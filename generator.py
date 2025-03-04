@@ -5,8 +5,6 @@ from OCC.Core.gp import gp_Ax2, gp_Pnt, gp_Dir
 from OCC.Core.TopoDS import TopoDS_Compound
 from OCC.Core.BRep import BRep_Builder
 from OCC.Core.STEPControl import STEPControl_Reader
-from OCC.Core.TopoDS import TopoDS_Compound
-from OCC.Core.BRep import BRep_Builder
 from PIL import Image, ImageFilter, ImageDraw, ImageFont, ImageOps
 import qrcode
 import os
@@ -187,12 +185,12 @@ def generateLabel(label):
 
 
 def generateLabelSheets(labelDataList, dstPath="out.pdf"):
-
     global defaultFont
-    if "font" in labelDataList:
-        defaultFont = ImageFont.truetype(labelDataList["font"], 40)
-    else:
-        defaultFont = ImageFont.truetype("Pillow/Tests/fonts/FreeMono.ttf", 40)
+    try:
+        defaultFont = ImageFont.truetype("arial.ttf", 38)
+    except IOError:
+        print("Arial font not found. Using built-in default font.")
+        defaultFont = ImageFont.load_default()
 
     labels = []
     for label in labelDataList["stickerList"]:
@@ -207,7 +205,6 @@ def generateLabelSheets(labelDataList, dstPath="out.pdf"):
     xOffset = margin
     yOffset = margin
     for label in labels:
-
         if xOffset + label.width > sheetWidthPoints - margin:
             xOffset = margin
             yOffset += label.height + margin
@@ -218,7 +215,6 @@ def generateLabelSheets(labelDataList, dstPath="out.pdf"):
     outSheet.save(dstPath, save_all=True)
 
 if __name__ == '__main__':
-
     if len(sys.argv) != 2:
         print("Usage: python3 generator.py <config file>")
         sys.exit(1)
@@ -227,6 +223,6 @@ if __name__ == '__main__':
     with open(config_file, 'r') as file:
         config_data = json.load(file)
     
-        generateLabelSheets(config_data)
+    generateLabelSheets(config_data)
 
     print("Done")
