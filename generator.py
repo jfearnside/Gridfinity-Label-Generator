@@ -5,6 +5,7 @@ from OCC.Core.gp import gp_Ax2, gp_Pnt, gp_Dir
 from OCC.Core.TopoDS import TopoDS_Compound
 from OCC.Core.BRep import BRep_Builder
 from OCC.Core.STEPControl import STEPControl_Reader
+from OCC.Core.IFSelect import IFSelect_RetDone
 from PIL import Image, ImageFilter, ImageDraw, ImageFont, ImageOps
 import qrcode
 import os
@@ -32,7 +33,10 @@ def renderAngle(shape, orientation = gp_Dir(1., 0., 0.), hideObstructed = True):
     myAlgo.Update() # 0.03s
 
     if hideObstructed:
-        myAlgo.Hide()       # Hide the obsructed lines (very slow!) : 1.36s
+        try:
+            myAlgo.Hide()       # Hide the obsructed lines (very slow!) : 1.36s
+        except Exception as e:
+            print(f"Error hiding obstructed lines: {e}")
 
     aHLRToShape = HLRBRep_HLRToShape(myAlgo) # 0.00s
 
@@ -87,16 +91,26 @@ def render3D(stepFile, orientation = gp_Dir(1., 0., 0.), hideObstructed = True):
     start_time = time.time()
 
     stepReader = STEPControl_Reader()       # 0.00s
-    stepReader.ReadFile(stepFile)       # 0.00s
+    status = stepReader.ReadFile(stepFile)  # 0.00s
+
+    if status != IFSelect_RetDone:
+        print(f"Error reading STEP file: {stepFile}")
+        return
+
     stepReader.TransferRoot()       # 0.04s
     myshape = stepReader.Shape()    # 0.00s
+
+    if myshape.IsNull():
+        print(f"Invalid shape in STEP file: {stepFile}")
+        return
 
     try:
         aCompound = renderAngle(myshape, orientation, hideObstructed)   # 1.39
         renderer = UpdatedOffscreenRenderer()   # 0.03s
         renderer.DisplayShape(aCompound, color="Black", transparency=True, dump_image_path='.', dump_image_filename="tmp3D.png")    # 0.03s
-    except ValueError:
-        pass
+        print(f"Rendered 3D model from {stepFile} to tmp3D.png")
+    except Exception as e:
+        print(f"Error rendering 3D model from {stepFile}: {e}")
 
 def getTextSize(text):
 
@@ -115,27 +129,25 @@ def getTextSize(text):
 def generateLabel(label):
     widthPoints = int(label["width"] * dpi / 25.4)
     heightPoints = int(label["height"] * dpi / 25.4)
-    topLeftRoundedCorner = int(label["topLeftRoundedCorner"] * dpi / 25.4)
-    topRightRoundedCorner = int(label["topRightRoundedCorner"] * dpi / 25.4)
-    bottomLeftRoundedCorner = int(label["bottomLeftRoundedCorner"] * dpi / 25.4)
-    bottomRightRoundedCorner = int(label["bottomRightRoundedCorner"] * dpi / 25.4)
-
-    img = Image.new("RGB", size=(widthPoints, heightPoints), color=(255, 255, 255, 0))
+    img = Image.new("RGB", (widthPoints, heightPoints), (255, 255, 255))
+    draw = ImageDraw.Draw(img)
 
     # Draw the border
-    d = ImageDraw.Draw(img)
-
     lineWidth = 10
     hl = lineWidth / 2
-    d.line([(topLeftRoundedCorner, hl), (widthPoints - topRightRoundedCorner, hl)], fill="black", width=lineWidth)
-    d.line([(widthPoints - hl, topRightRoundedCorner), (widthPoints - hl, heightPoints - bottomRightRoundedCorner)], fill="black", width=lineWidth)
-    d.line([(widthPoints - bottomRightRoundedCorner, heightPoints - hl), (bottomLeftRoundedCorner, heightPoints - hl)], fill="black", width=lineWidth)
-    d.line([(hl, heightPoints - bottomLeftRoundedCorner), (hl, topLeftRoundedCorner)], fill="black", width=lineWidth)
+    topLeftRoundedCorner = label.get("topLeftRoundedCorner", 0)
+    topRightRoundedCorner = label.get("topRightRoundedCorner", 0)
+    bottomLeftRoundedCorner = label.get("bottomLeftRoundedCorner", 0)
+    bottomRightRoundedCorner = label.get("bottomRightRoundedCorner", 0)
+    draw.line([(topLeftRoundedCorner, hl), (widthPoints - topRightRoundedCorner, hl)], fill="black", width=lineWidth)
+    draw.line([(widthPoints - hl, topRightRoundedCorner), (widthPoints - hl, heightPoints - bottomRightRoundedCorner)], fill="black", width=lineWidth)
+    draw.line([(widthPoints - bottomRightRoundedCorner, heightPoints - hl), (bottomLeftRoundedCorner, heightPoints - hl)], fill="black", width=lineWidth)
+    draw.line([(hl, heightPoints - bottomLeftRoundedCorner), (hl, topLeftRoundedCorner)], fill="black", width=lineWidth)
 
-    d.arc([(0, 0), (topLeftRoundedCorner * 2, topLeftRoundedCorner * 2)], 180, 270, fill="black", width=lineWidth)
-    d.arc([(widthPoints - (2 * topRightRoundedCorner), 0), (widthPoints, (2 * topRightRoundedCorner))], 270, 360, fill="black", width=lineWidth)
-    d.arc([(0, heightPoints - (2 * bottomLeftRoundedCorner)), (2 * bottomLeftRoundedCorner, heightPoints)], 90, 180, fill="black", width=lineWidth)
-    d.arc([(widthPoints - (2 * bottomRightRoundedCorner), heightPoints - (2 * bottomRightRoundedCorner)), (widthPoints, heightPoints)], 0, 90, fill="black", width=lineWidth)
+    draw.arc([(0, 0), (topLeftRoundedCorner * 2, topLeftRoundedCorner * 2)], 180, 270, fill="black", width=lineWidth)
+    draw.arc([(widthPoints - (2 * topRightRoundedCorner), 0), (widthPoints, (2 * topRightRoundedCorner))], 270, 360, fill="black", width=lineWidth)
+    draw.arc([(0, heightPoints - (2 * bottomLeftRoundedCorner)), (2 * bottomLeftRoundedCorner, heightPoints)], 90, 180, fill="black", width=lineWidth)
+    draw.arc([(widthPoints - (2 * bottomRightRoundedCorner), heightPoints - (2 * bottomRightRoundedCorner)), (widthPoints, heightPoints)], 0, 90, fill="black", width=lineWidth)
 
     # Write the text
     global defaultFont
@@ -147,18 +159,18 @@ def generateLabel(label):
     font2 = ImageFont.truetype("arial.ttf", fontSize2)
     font3 = ImageFont.truetype("arial.ttf", fontSize3)
 
-    l1Width, l1Height = d.textbbox((0, 0), label["textLine1"], font=font1)[2:]
-    l2Width, l2Height = d.textbbox((0, 0), label["textLine2"], font=font2)[2:]
-    l3Width, l3Height = d.textbbox((0, 0), label["textLine3"], font=font3)[2:]
+    l1Width, l1Height = draw.textbbox((0, 0), label["textLine1"], font=font1)[2:]
+    l2Width, l2Height = draw.textbbox((0, 0), label["textLine2"], font=font2)[2:]
+    l3Width, l3Height = draw.textbbox((0, 0), label["textLine3"], font=font3)[2:]
 
     l1PosX = ((widthPoints - l1Width) / 2)
     l2PosX = ((widthPoints - l2Width) / 2)
     l3PosX = ((widthPoints - l3Width) / 2)
     verticalSpacing = ((heightPoints - l1Height - l2Height - l3Height - lineWidth - lineWidth) / 4)
 
-    d.text((l1PosX, verticalSpacing + lineWidth), label["textLine1"], font=font1, fill=(0, 0, 0, 255))
-    d.text((l2PosX, l1Height + (2 * verticalSpacing)), label["textLine2"], font=font2, fill=(0, 0, 0, 255))
-    d.text((l3PosX, l1Height + l2Height + (3 * verticalSpacing)), label["textLine3"], font=font3, fill=(0, 0, 0, 255))
+    draw.text((l1PosX, verticalSpacing + lineWidth), label["textLine1"], font=font1, fill=(0, 0, 0, 255))
+    draw.text((l2PosX, l1Height + (2 * verticalSpacing)), label["textLine2"], font=font2, fill=(0, 0, 0, 255))
+    draw.text((l3PosX, l1Height + l2Height + (3 * verticalSpacing)), label["textLine3"], font=font3, fill=(0, 0, 0, 255))
 
     imagesMargin = (lineWidth + 10)
     imagesHeight = (heightPoints - (2 * imagesMargin))
@@ -166,6 +178,7 @@ def generateLabel(label):
     # Render the 3D model
     if os.path.exists(label["modelPath"]):
         try:
+            print(f"Rendering 3D model for {label['modelPath']}")
             render3D(label["modelPath"], convert_angles_to_direction(label["alpha"], label["beta"]), label["hideObstructed"])  # 1.6s
 
             modelImage = makeLinesThicker("tmp3D.png")  # 0.49s
@@ -173,10 +186,10 @@ def generateLabel(label):
             modelImage.thumbnail((imagesHeight, imagesHeight), Image.Resampling.LANCZOS)
             img.paste(modelImage, (imagesMargin, imagesMargin))
         except FileNotFoundError:
+            print(f"File not found: {label['modelPath']}")
             pass
 
-    # Draw the QR code
-    # box_size is the pixel size of each square of the QR code
+    # Generate and paste the QR code
     qr = qrcode.QRCode(
         version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_L,
@@ -185,11 +198,9 @@ def generateLabel(label):
     )
     qr.add_data(label["qrCodeUrl"])
     qr.make(fit=True)
-
     qrCode = qr.make_image(fill_color="black", back_color="white")
-
-    qrCode.thumbnail((imagesHeight, imagesHeight), Image.Resampling.LANCZOS)
-    img.paste(qrCode, (widthPoints - imagesHeight - imagesMargin, imagesMargin))
+    qrCode.thumbnail((100, 100), Image.Resampling.LANCZOS)
+    img.paste(qrCode, (widthPoints - 110, 10))
 
     return img
 
@@ -224,7 +235,7 @@ def generateLabelSheets(labelDataList, dstPath="out.pdf"):
 
     outSheet.save(dstPath, save_all=True)
 
-    print("PDF export complete. File saved to:", dstPath)  # Add this line to indicate completion
+    print("PDF export complete. File saved to:", dstPath)
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
