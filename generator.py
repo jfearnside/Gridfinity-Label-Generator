@@ -205,6 +205,7 @@ def generateLabelSheets(labelDataList, dstPath="out.pdf"):
     for label in labelDataList["stickerList"]:
         labels.append(generateLabel(label))
 
+    # Create a PDF with the labels
     sheetWidthPoints = int(labelDataList["pageWidth"] * dpi / 25.4)
     sheetHeightPoints = int(labelDataList["pageHeight"] * dpi / 25.4)
 
@@ -222,6 +223,8 @@ def generateLabelSheets(labelDataList, dstPath="out.pdf"):
         xOffset += 500
 
     outSheet.save(dstPath, save_all=True)
+
+    print("PDF export complete. File saved to:", dstPath)  # Add this line to indicate completion
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:

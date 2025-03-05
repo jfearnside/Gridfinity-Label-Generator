@@ -1,5 +1,6 @@
 from PySide6 import QtCore, QtWidgets, QtGui
 import json
+import sys
 
 from stickerForm import StickerForm
 from sticker import Sticker
@@ -176,6 +177,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                                   "PDF Files (*.pdf)", options=options)
         if fileName:
             generateLabelSheets(self.getData(), fileName)
+            QtWidgets.QMessageBox.information(self, "Export Complete", f"PDF export complete. File saved to: {fileName}")
 
     @QtCore.Slot()
     def closeApp(self):
