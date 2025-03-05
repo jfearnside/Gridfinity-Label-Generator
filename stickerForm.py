@@ -67,9 +67,28 @@ class StickerForm(QtWidgets.QWidget):
 
         currentLayoutLine += 1
 
-        self.layout.addWidget(QtWidgets.QLabel("Line 3:"), currentLayoutLine, 0)  # New label for the third line
-        self.textLine3 = QtWidgets.QLineEdit(self)  # New input field for the third line
+        self.layout.addWidget(QtWidgets.QLabel("Line 3:"), currentLayoutLine, 0)
+        self.textLine3 = QtWidgets.QLineEdit(self)
         self.layout.addWidget(self.textLine3, currentLayoutLine, 1, 1, -1)
+
+        currentLayoutLine += 1
+
+        # Font sizes
+        self.layout.addWidget(QtWidgets.QLabel("Font Size 1:"), currentLayoutLine, 0)
+        self.fontSize1 = QtWidgets.QSpinBox(self, minimum=1, maximum=100, value=30)
+        self.layout.addWidget(self.fontSize1, currentLayoutLine, 1)
+
+        currentLayoutLine += 1
+
+        self.layout.addWidget(QtWidgets.QLabel("Font Size 2:"), currentLayoutLine, 0)
+        self.fontSize2 = QtWidgets.QSpinBox(self, minimum=1, maximum=100, value=20)
+        self.layout.addWidget(self.fontSize2, currentLayoutLine, 1)
+
+        currentLayoutLine += 1
+
+        self.layout.addWidget(QtWidgets.QLabel("Font Size 3:"), currentLayoutLine, 0)
+        self.fontSize3 = QtWidgets.QSpinBox(self, minimum=1, maximum=100, value=20)
+        self.layout.addWidget(self.fontSize3, currentLayoutLine, 1)
 
         currentLayoutLine += 1
 
@@ -187,7 +206,11 @@ class StickerForm(QtWidgets.QWidget):
 
         self.textLine1.setText(self.sticker.textLine1)
         self.textLine2.setText(self.sticker.textLine2)
-        self.textLine3.setText(self.sticker.textLine3)  # New line for the third text line
+        self.textLine3.setText(self.sticker.textLine3)
+
+        self.fontSize1.setValue(self.sticker.fontSize1)  # Load the font size for the first line
+        self.fontSize2.setValue(self.sticker.fontSize2)  # Load the font size for the second line
+        self.fontSize3.setValue(self.sticker.fontSize3)  # Load the font size for the third line
 
         self.qrCodeUrl.setText(self.sticker.qrCodeUrl)
         self.modelPath.setText(self.sticker.modelPath)
@@ -217,7 +240,12 @@ class StickerForm(QtWidgets.QWidget):
 
         self.sticker.textLine1 = self.textLine1.text()
         self.sticker.textLine2 = self.textLine2.text()
-        self.sticker.textLine3 = self.textLine3.text()  # New line for the third text line
+        self.sticker.textLine3 = self.textLine3.text()
+
+        self.sticker.fontSize1 = self.fontSize1.value()  # Save the font size for the first line
+        self.sticker.fontSize2 = self.fontSize2.value()  # Save the font size for the second line
+        self.sticker.fontSize3 = self.fontSize3.value()  # Save the font size for the third line
+
         self.sticker.qrCodeUrl = self.qrCodeUrl.text()
         self.sticker.modelPath = self.modelPath.text()
 

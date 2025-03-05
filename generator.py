@@ -139,9 +139,9 @@ def generateLabel(label):
 
     # Write the text
     global defaultFont
-    fontSize1 = 30  # Font size for the first line
-    fontSize2 = 20  # Font size for the second line
-    fontSize3 = 20  # Font size for the third line
+    fontSize1 = label.get("fontSize1", 30)  # Font size for the first line
+    fontSize2 = label.get("fontSize2", 20)  # Font size for the second line
+    fontSize3 = label.get("fontSize3", 20)  # Font size for the third line
 
     font1 = ImageFont.truetype("arial.ttf", fontSize1)
     font2 = ImageFont.truetype("arial.ttf", fontSize2)
