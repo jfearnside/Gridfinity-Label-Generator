@@ -138,19 +138,27 @@ def generateLabel(label):
     d.arc([(widthPoints - (2 * bottomRightRoundedCorner), heightPoints - (2 * bottomRightRoundedCorner)), (widthPoints, heightPoints)], 0, 90, fill="black", width=lineWidth)
 
     # Write the text
-    l1Width, l1Height = getTextSize(label["textLine1"])
-    l2Width, l2Height = getTextSize(label["textLine2"])
-    l3Width, l3Height = getTextSize(label["textLine3"])
+    global defaultFont
+    fontSize1 = 30  # Font size for the first line
+    fontSize2 = 20  # Font size for the second line
+    fontSize3 = 20  # Font size for the third line
+
+    font1 = ImageFont.truetype("arial.ttf", fontSize1)
+    font2 = ImageFont.truetype("arial.ttf", fontSize2)
+    font3 = ImageFont.truetype("arial.ttf", fontSize3)
+
+    l1Width, l1Height = d.textbbox((0, 0), label["textLine1"], font=font1)[2:]
+    l2Width, l2Height = d.textbbox((0, 0), label["textLine2"], font=font2)[2:]
+    l3Width, l3Height = d.textbbox((0, 0), label["textLine3"], font=font3)[2:]
 
     l1PosX = ((widthPoints - l1Width) / 2)
     l2PosX = ((widthPoints - l2Width) / 2)
     l3PosX = ((widthPoints - l3Width) / 2)
     verticalSpacing = ((heightPoints - l1Height - l2Height - l3Height - lineWidth - lineWidth) / 4)
 
-    global defaultFont
-    d.text((l1PosX, verticalSpacing + lineWidth), label["textLine1"], font=defaultFont, fill=(0, 0, 0, 255))
-    d.text((l2PosX, l1Height + (2 * verticalSpacing)), label["textLine2"], font=defaultFont, fill=(0, 0, 0, 255))
-    d.text((l3PosX, l1Height + l2Height + (3 * verticalSpacing)), label["textLine3"], font=defaultFont, fill=(0, 0, 0, 255))
+    d.text((l1PosX, verticalSpacing + lineWidth), label["textLine1"], font=font1, fill=(0, 0, 0, 255))
+    d.text((l2PosX, l1Height + (2 * verticalSpacing)), label["textLine2"], font=font2, fill=(0, 0, 0, 255))
+    d.text((l3PosX, l1Height + l2Height + (3 * verticalSpacing)), label["textLine3"], font=font3, fill=(0, 0, 0, 255))
 
     imagesMargin = (lineWidth + 10)
     imagesHeight = (heightPoints - (2 * imagesMargin))
@@ -184,7 +192,6 @@ def generateLabel(label):
     img.paste(qrCode, (widthPoints - imagesHeight - imagesMargin, imagesMargin))
 
     return img
-
 
 def generateLabelSheets(labelDataList, dstPath="out.pdf"):
     global defaultFont
