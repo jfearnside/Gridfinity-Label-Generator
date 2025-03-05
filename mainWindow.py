@@ -1,6 +1,8 @@
 from PySide6 import QtCore, QtWidgets, QtGui
 import json
 import sys
+import os
+import subprocess
 
 from stickerForm import StickerForm
 from sticker import Sticker
@@ -177,7 +179,23 @@ class MainWindow(QtWidgets.QMainWindow):
                                                   "PDF Files (*.pdf)", options=options)
         if fileName:
             generateLabelSheets(self.getData(), fileName)
-            QtWidgets.QMessageBox.information(self, "Export Complete", f"PDF export complete. File saved to: {fileName}")
+            msgBox = QtWidgets.QMessageBox(self)
+            msgBox.setWindowTitle("Export Complete")
+            msgBox.setText(f"PDF export complete. File saved to: {fileName}")
+            openButton = msgBox.addButton("Open PDF", QtWidgets.QMessageBox.ActionRole)
+            msgBox.addButton(QtWidgets.QMessageBox.Ok)
+            msgBox.exec()
+
+            if msgBox.clickedButton() == openButton:
+                self.openPDF(fileName)
+
+    def openPDF(self, filePath):
+        if sys.platform == "win32":
+            os.startfile(filePath)
+        elif sys.platform == "darwin":
+            subprocess.call(["open", filePath])
+        else:
+            subprocess.call(["xdg-open", filePath])
 
     @QtCore.Slot()
     def closeApp(self):
