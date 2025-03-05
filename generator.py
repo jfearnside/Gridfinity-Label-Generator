@@ -113,7 +113,6 @@ def getTextSize(text):
     return (text_width, text_height)
 
 def generateLabel(label):
-
     widthPoints = int(label["width"] * dpi / 25.4)
     heightPoints = int(label["height"] * dpi / 25.4)
     topLeftRoundedCorner = int(label["topLeftRoundedCorner"] * dpi / 25.4)
@@ -127,38 +126,41 @@ def generateLabel(label):
     d = ImageDraw.Draw(img)
 
     lineWidth = 10
-    hl = lineWidth/2
-    d.line([(topLeftRoundedCorner, hl), (widthPoints-topRightRoundedCorner, hl)] , fill="black", width=lineWidth) 
-    d.line([(widthPoints-hl, topRightRoundedCorner), (widthPoints-hl, heightPoints - bottomRightRoundedCorner)] , fill="black", width=lineWidth) 
-    d.line([(widthPoints - bottomRightRoundedCorner, heightPoints-hl), (bottomLeftRoundedCorner, heightPoints-hl)] , fill="black", width=lineWidth) 
-    d.line([(hl, heightPoints - bottomLeftRoundedCorner), (hl, topLeftRoundedCorner)] , fill="black", width=lineWidth) 
+    hl = lineWidth / 2
+    d.line([(topLeftRoundedCorner, hl), (widthPoints - topRightRoundedCorner, hl)], fill="black", width=lineWidth)
+    d.line([(widthPoints - hl, topRightRoundedCorner), (widthPoints - hl, heightPoints - bottomRightRoundedCorner)], fill="black", width=lineWidth)
+    d.line([(widthPoints - bottomRightRoundedCorner, heightPoints - hl), (bottomLeftRoundedCorner, heightPoints - hl)], fill="black", width=lineWidth)
+    d.line([(hl, heightPoints - bottomLeftRoundedCorner), (hl, topLeftRoundedCorner)], fill="black", width=lineWidth)
 
-    d.arc([(0, 0), (topLeftRoundedCorner*2, topLeftRoundedCorner*2)], 180, 270, fill="black", width=lineWidth)
-    d.arc([(widthPoints-(2*topRightRoundedCorner), 0), (widthPoints, (2*topRightRoundedCorner))], 270, 360, fill="black", width=lineWidth)
-    d.arc([(0, heightPoints-(2*bottomLeftRoundedCorner)), (2*bottomLeftRoundedCorner, heightPoints)], 90, 180, fill="black", width=lineWidth)
-    d.arc([(widthPoints-(2*bottomRightRoundedCorner), heightPoints-(2*bottomRightRoundedCorner)), (widthPoints, heightPoints)], 0, 90, fill="black", width=lineWidth)
+    d.arc([(0, 0), (topLeftRoundedCorner * 2, topLeftRoundedCorner * 2)], 180, 270, fill="black", width=lineWidth)
+    d.arc([(widthPoints - (2 * topRightRoundedCorner), 0), (widthPoints, (2 * topRightRoundedCorner))], 270, 360, fill="black", width=lineWidth)
+    d.arc([(0, heightPoints - (2 * bottomLeftRoundedCorner)), (2 * bottomLeftRoundedCorner, heightPoints)], 90, 180, fill="black", width=lineWidth)
+    d.arc([(widthPoints - (2 * bottomRightRoundedCorner), heightPoints - (2 * bottomRightRoundedCorner)), (widthPoints, heightPoints)], 0, 90, fill="black", width=lineWidth)
 
     # Write the text
     l1Width, l1Height = getTextSize(label["textLine1"])
     l2Width, l2Height = getTextSize(label["textLine2"])
+    l3Width, l3Height = getTextSize(label["textLine3"])
 
-    l1PosX = ((widthPoints-l1Width)/2)
-    l2PosX = ((widthPoints-l2Width)/2)
-    verticalSpacing = ((heightPoints-l1Height-l2Height-lineWidth-lineWidth)/3)
+    l1PosX = ((widthPoints - l1Width) / 2)
+    l2PosX = ((widthPoints - l2Width) / 2)
+    l3PosX = ((widthPoints - l3Width) / 2)
+    verticalSpacing = ((heightPoints - l1Height - l2Height - l3Height - lineWidth - lineWidth) / 4)
 
     global defaultFont
-    d.text((l1PosX, verticalSpacing+lineWidth), label["textLine1"], font=defaultFont, fill=(0, 0, 0, 255))
-    d.text((l2PosX, l1Height+(2*verticalSpacing)), label["textLine2"], font=defaultFont, fill=(0, 0, 0, 255))
+    d.text((l1PosX, verticalSpacing + lineWidth), label["textLine1"], font=defaultFont, fill=(0, 0, 0, 255))
+    d.text((l2PosX, l1Height + (2 * verticalSpacing)), label["textLine2"], font=defaultFont, fill=(0, 0, 0, 255))
+    d.text((l3PosX, l1Height + l2Height + (3 * verticalSpacing)), label["textLine3"], font=defaultFont, fill=(0, 0, 0, 255))
 
-    imagesMargin = (lineWidth+10)
-    imagesHeight = (heightPoints - (2*imagesMargin))
+    imagesMargin = (lineWidth + 10)
+    imagesHeight = (heightPoints - (2 * imagesMargin))
 
     # Render the 3D model
     if os.path.exists(label["modelPath"]):
         try:
-            render3D(label["modelPath"], convert_angles_to_direction(label["alpha"], label["beta"]), label["hideObstructed"])   # 1.6s
+            render3D(label["modelPath"], convert_angles_to_direction(label["alpha"], label["beta"]), label["hideObstructed"])  # 1.6s
 
-            modelImage = makeLinesThicker("tmp3D.png")   # 0.49s
+            modelImage = makeLinesThicker("tmp3D.png")  # 0.49s
 
             modelImage.thumbnail((imagesHeight, imagesHeight), Image.Resampling.LANCZOS)
             img.paste(modelImage, (imagesMargin, imagesMargin))
@@ -179,7 +181,7 @@ def generateLabel(label):
     qrCode = qr.make_image(fill_color="black", back_color="white")
 
     qrCode.thumbnail((imagesHeight, imagesHeight), Image.Resampling.LANCZOS)
-    img.paste(qrCode, (widthPoints-imagesHeight-imagesMargin, imagesMargin))
+    img.paste(qrCode, (widthPoints - imagesHeight - imagesMargin, imagesMargin))
 
     return img
 

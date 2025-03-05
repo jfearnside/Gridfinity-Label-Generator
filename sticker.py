@@ -13,6 +13,7 @@ class Sticker(QtWidgets.QListWidgetItem):
 
     textLine1 = ""
     textLine2 = ""
+    textLine3 = ""  # New attribute for the third line of text
     qrCodeUrl = ""
     modelPath = ""
 
@@ -33,6 +34,7 @@ class Sticker(QtWidgets.QListWidgetItem):
             self.bottomRightRoundedCorner = jsonData["bottomRightRoundedCorner"]
             self.textLine1 = jsonData["textLine1"]
             self.textLine2 = jsonData["textLine2"]
+            self.textLine3 = jsonData["textLine3"]  # Initialize the third line of text
             self.qrCodeUrl = jsonData["qrCodeUrl"]
             self.modelPath = jsonData["modelPath"]
             self.alpha = jsonData["alpha"]
@@ -48,7 +50,7 @@ class Sticker(QtWidgets.QListWidgetItem):
             self.setText("Sticker")
             return
         
-        self.setText(self.textLine1 + " " + self.textLine2)
+        self.setText(self.textLine1 + " " + self.textLine2 + " " + self.textLine3)  # Update to include the third line
 
     def getJson(self):
         return {
@@ -60,6 +62,7 @@ class Sticker(QtWidgets.QListWidgetItem):
             "bottomRightRoundedCorner": self.bottomRightRoundedCorner,
             "textLine1": self.textLine1,
             "textLine2": self.textLine2,
+            "textLine3": self.textLine3,  # Include the third line in the JSON output
             "qrCodeUrl": self.qrCodeUrl,
             "modelPath": self.modelPath,
             "alpha": self.alpha,

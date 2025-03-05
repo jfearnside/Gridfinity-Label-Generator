@@ -67,6 +67,12 @@ class StickerForm(QtWidgets.QWidget):
 
         currentLayoutLine += 1
 
+        self.layout.addWidget(QtWidgets.QLabel("Line 3:"), currentLayoutLine, 0)  # New label for the third line
+        self.textLine3 = QtWidgets.QLineEdit(self)  # New input field for the third line
+        self.layout.addWidget(self.textLine3, currentLayoutLine, 1, 1, -1)
+
+        currentLayoutLine += 1
+
         # QR Code URL
         self.layout.addWidget(QtWidgets.QLabel("QR code:"), currentLayoutLine, 0)
         self.qrCodeUrl = QtWidgets.QLineEdit(self)
@@ -181,6 +187,7 @@ class StickerForm(QtWidgets.QWidget):
 
         self.textLine1.setText(self.sticker.textLine1)
         self.textLine2.setText(self.sticker.textLine2)
+        self.textLine3.setText(self.sticker.textLine3)  # New line for the third text line
 
         self.qrCodeUrl.setText(self.sticker.qrCodeUrl)
         self.modelPath.setText(self.sticker.modelPath)
@@ -210,6 +217,7 @@ class StickerForm(QtWidgets.QWidget):
 
         self.sticker.textLine1 = self.textLine1.text()
         self.sticker.textLine2 = self.textLine2.text()
+        self.sticker.textLine3 = self.textLine3.text()  # New line for the third text line
         self.sticker.qrCodeUrl = self.qrCodeUrl.text()
         self.sticker.modelPath = self.modelPath.text()
 
