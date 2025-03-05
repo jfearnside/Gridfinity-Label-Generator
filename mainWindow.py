@@ -20,6 +20,7 @@ class MainWindow(QtWidgets.QMainWindow):
         super().__init__()
 
         self.setWindowIcon(QtGui.QIcon("resources/icon.svg"))
+        self.setWindowTitle("Hardware Label Maker")
 
         self.mainWidget = QtWidgets.QSplitter(self)
         self.setCentralWidget(self.mainWidget)
@@ -215,3 +216,22 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.stickerList.currentItem() is not None:
             self.stickerForm.saveData()
             self.stickerForm.loadData(self.stickerList.currentItem())
+
+    def loadSticker(self):
+        # Logic to load sticker data
+        sticker = ...  # Load sticker data from a file or other source
+        self.stickerForm.loadData(sticker)
+
+    def saveSticker(self):
+        # Logic to save sticker data
+        self.stickerForm.saveData()
+        sticker = self.stickerForm.sticker
+        ...  # Save sticker data to a file or other destination
+
+if __name__ == "__main__":
+    app = QtWidgets.QApplication([])
+
+    window = MainWindow()
+    window.show()
+
+    app.exec()

@@ -2,7 +2,7 @@ from PySide6 import QtCore, QtWidgets, QtGui
 from PIL import ImageQt
 import os
 
-from generator import render3D, convert_angles_to_direction, makeLinesThicker
+from generator import render3D, convert_angles_to_direction, makeLinesThicker, generateLabel  # Import generateLabel function
 
 
 class StickerForm(QtWidgets.QWidget):
@@ -136,7 +136,19 @@ class StickerForm(QtWidgets.QWidget):
         self.hideObstructedCheckbox = QtWidgets.QCheckBox(self, text="Hide obstructed lines", checked=True)
         self.layout.addWidget(self.hideObstructedCheckbox, currentLayoutLine+2, 4, 1, 3)
         self.hideObstructedCheckbox.stateChanged.connect(self.refresh3DViewFull)
-        
+
+        currentLayoutLine += 3  # Move to the next row after adding 3D view controls
+
+        # Preview section
+        self.layout.addWidget(QtWidgets.QLabel("Preview:"), currentLayoutLine, 0)
+        self.previewLabel = QtWidgets.QLabel(self)  # QLabel to display the preview image
+        self.layout.addWidget(self.previewLabel, currentLayoutLine, 1, 1, 5)
+        self.refreshButton = QtWidgets.QPushButton(self, text="Refresh Preview")  # Button to refresh the preview
+        self.refreshButton.clicked.connect(self.refreshPreview)  # Connect the button click to the refreshPreview function
+        self.layout.addWidget(self.refreshButton, currentLayoutLine, 6)
+
+        currentLayoutLine += 1
+
     @QtCore.Slot()
     def selectModel(self):
         modelFilePaths = QtWidgets.QFileDialog.getOpenFileName(self, "Select 3D model", "", "3D model (*)")
@@ -189,6 +201,37 @@ class StickerForm(QtWidgets.QWidget):
         self.scene.addPixmap(pixMap)
 
         self.graphicsView.fitInView(self.scene.itemsBoundingRect(), QtCore.Qt.KeepAspectRatio)
+
+    @QtCore.Slot()
+    def refreshPreview(self):
+        # Logic to refresh the preview image
+        label_data = {
+            "width": self.widthField.value(),
+            "height": self.heightField.value(),
+            "topLeftRoundedCorner": self.topLeftRoundedCorner.value(),
+            "topRightRoundedCorner": self.topRightRoundedCorner.value(),
+            "bottomLeftRoundedCorner": self.bottomLeftRoundedCorner.value(),
+            "bottomRightRoundedCorner": self.bottomRightRoundedCorner.value(),
+            "textLine1": self.textLine1.text(),
+            "textLine2": self.textLine2.text(),
+            "textLine3": self.textLine3.text(),
+            "fontSize1": self.fontSize1.value(),
+            "fontSize2": self.fontSize2.value(),
+            "fontSize3": self.fontSize3.value(),
+            "qrCodeUrl": self.qrCodeUrl.text(),
+            "modelPath": self.modelPath.text(),  # Add modelPath to the label_data dictionary
+            "alpha": self.alphaSlider.value(),  # Add alpha to the label_data dictionary
+            "beta": self.betaSlider.value(),  # Add beta to the label_data dictionary
+            "hideObstructed": self.hideObstructedCheckbox.isChecked()  # Add hideObstructed to the label_data dictionary
+        }
+
+        # Generate the label image
+        img = generateLabel(label_data)
+
+        # Convert the image to QPixmap and set it to the preview label
+        self.imgQ = ImageQt.ImageQt(img)
+        pixMap = QtGui.QPixmap.fromImage(self.imgQ)
+        self.previewLabel.setPixmap(pixMap)  # Set the pixmap to the preview label
 
     def loadData(self, sticker):
         self.sticker = sticker
