@@ -60,7 +60,8 @@ class MainWindow(QtWidgets.QMainWindow):
         fileMenu.addAction(exportAction)
 
         # Export to PNG Action
-        exportToPNGAction = QtGui.QAction("Export to PNG", self)
+        exportToPNGAction = QtGui.QAction("Export to &PNG", self)
+        saveAsAction.setShortcut("Ctrl+Shift+E")
         exportToPNGAction.triggered.connect(self.exportToPNG)
         fileMenu.addAction(exportToPNGAction)
 
@@ -162,6 +163,7 @@ class MainWindow(QtWidgets.QMainWindow):
             for stickerData in data["stickerList"]:
                 self.stickerList.addItem(Sticker(stickerData))
             self.selectFirstItem()
+            self.stickerForm.refreshPreview()  # Refresh the preview after loading the first item
 
     def getData(self):
         self.refresh()
@@ -216,18 +218,21 @@ class MainWindow(QtWidgets.QMainWindow):
     def newSticker(self):
         self.stickerList.addItem(Sticker())
         self.selectFirstItem()
+        self.stickerForm.refreshPreview()  # Refresh the preview after adding a new sticker
 
     @QtCore.Slot()
     def deleteSticker(self):
         if self.stickerList.currentItem() is not None:
             self.stickerList.takeItem(self.stickerList.currentRow())
         self.selectFirstItem()
+        self.stickerForm.refreshPreview()  # Refresh the preview after deleting a sticker
 
     @QtCore.Slot()
     def refresh(self):
         if self.stickerList.currentItem() is not None:
             self.stickerForm.saveData()
             self.stickerForm.loadData(self.stickerList.currentItem())
+            self.stickerForm.refreshPreview()  # Refresh the preview when the current item changes
 
     def selectFirstItem(self):
         if self.stickerList.count() > 0:
