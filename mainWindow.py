@@ -3,7 +3,8 @@ import json
 import sys
 import os
 import subprocess
-
+import shutil
+from generator import generateLabel
 from stickerForm import StickerForm
 from sticker import Sticker
 from generator import generateLabelSheets
@@ -58,11 +59,22 @@ class MainWindow(QtWidgets.QMainWindow):
         exportAction.triggered.connect(self.exportFile)
         fileMenu.addAction(exportAction)
 
+        # Export to PNG Action
+        exportToPNGAction = QtGui.QAction("Export to PNG", self)
+        exportToPNGAction.triggered.connect(self.exportToPNG)
+        fileMenu.addAction(exportToPNGAction)
+
         # Quit Action
         quitAction = QtGui.QAction("&Quit", self)
         quitAction.setShortcut("Ctrl+Q")
         quitAction.triggered.connect(self.closeApp)
         fileMenu.addAction(quitAction)
+
+        # Add a toolbar with a button to export to PNG
+        self.toolbar = self.addToolBar("Main Toolbar")
+        exportToPNGButton = QtWidgets.QPushButton("Export to PNG", self)
+        exportToPNGButton.clicked.connect(self.exportToPNG)
+        self.toolbar.addWidget(exportToPNGButton)
 
         # Left part of the layout
         self.leftWidget = QtWidgets.QWidget(self)
@@ -88,7 +100,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.deleteStickerButton.clicked.connect(self.deleteSticker)
         self.bottomButtons.layout.addWidget(self.deleteStickerButton)
 
-        self.printButton = QtWidgets.QPushButton("🖨️", self)
+        self.printButton = QtWidgets.QPushButton("PDF", self)
         self.printButton.setFixedSize(40, 40)
         self.printButton.clicked.connect(self.exportFile)
         self.bottomButtons.layout.addWidget(self.printButton)
@@ -216,6 +228,61 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.stickerList.currentItem() is not None:
             self.stickerForm.saveData()
             self.stickerForm.loadData(self.stickerList.currentItem())
+
+
+    def exportToPNG(self):
+        # Prompt the user to select a folder for the output
+        folder = QtWidgets.QFileDialog.getExistingDirectory(self, "Select Output Folder")
+
+        if not folder:
+            return
+
+        # Generate and save the PNGs
+        stickers = self.getStickers()  # Get the list of stickers
+        for sticker in stickers:
+            if sticker is None:
+                continue
+
+            label_data = {
+                "width": sticker.width,
+                "height": sticker.height,
+                "topLeftRoundedCorner": sticker.topLeftRoundedCorner,
+                "topRightRoundedCorner": sticker.topRightRoundedCorner,
+                "bottomLeftRoundedCorner": sticker.bottomLeftRoundedCorner,
+                "bottomRightRoundedCorner": sticker.bottomRightRoundedCorner,
+                "textLine1": sticker.textLine1,
+                "textLine2": sticker.textLine2,
+                "textLine3": sticker.textLine3,
+                "fontSize1": sticker.fontSize1,
+                "fontSize2": sticker.fontSize2,
+                "fontSize3": sticker.fontSize3,
+                "qrCodeUrl": sticker.qrCodeUrl,
+                "modelPath": sticker.modelPath,
+                "alpha": sticker.alpha,
+                "beta": sticker.beta,
+                "hideObstructed": sticker.hideObstructed
+            }
+
+            img = generateLabel(label_data)
+            img_path = os.path.join(folder, f"{sticker.name}.png")
+            img.save(img_path)
+
+        # Show a message box to indicate success
+        msgBox = QtWidgets.QMessageBox()
+        msgBox.setText("Labels exported to PNG successfully.")
+        msgBox.setInformativeText("Do you want to open the folder?")
+        msgBox.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+        msgBox.setDefaultButton(QtWidgets.QMessageBox.Yes)
+        ret = msgBox.exec()
+
+        if ret == QtWidgets.QMessageBox.Yes:
+            # Open the folder
+            os.startfile(folder)
+
+    def getStickers(self):
+        # Placeholder method to get the list of stickers
+        # Replace this with your actual method to get the list of stickers
+        return [self.stickerForm.sticker]  # Example: return a list with a single sticker
 
     def loadSticker(self):
         # Logic to load sticker data

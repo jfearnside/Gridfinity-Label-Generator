@@ -25,29 +25,53 @@ class Sticker(QtWidgets.QListWidgetItem):
     
     hideObstructed = True
 
-    def __init__(self, jsonData={}, parent=None):
-        super().__init__(parent)
+    def __init__(self, data=None):
+        super().__init__()
+        if data:
+            self.loadFromJson(data)
+        else:
+            self.name = "sticker"  # Default name
+            self.width = 37
+            self.height = 13
+            self.topLeftRoundedCorner = 4
+            self.topRightRoundedCorner = 4
+            self.bottomLeftRoundedCorner = 0
+            self.bottomRightRoundedCorner = 0
+            self.textLine1 = ""
+            self.textLine2 = ""
+            self.textLine3 = ""
+            self.fontSize1 = 30
+            self.fontSize2 = 20
+            self.fontSize3 = 20
+            self.qrCodeUrl = ""
+            self.modelPath = ""
+            self.alpha = 180
+            self.beta = 180
+            self.hideObstructed = True
 
-        if jsonData:
-            self.width = jsonData["width"]
-            self.height = jsonData["height"]
-            self.topLeftRoundedCorner = jsonData["topLeftRoundedCorner"]
-            self.topRightRoundedCorner = jsonData["topRightRoundedCorner"]
-            self.bottomLeftRoundedCorner = jsonData["bottomLeftRoundedCorner"]
-            self.bottomRightRoundedCorner = jsonData["bottomRightRoundedCorner"]
-            self.textLine1 = jsonData["textLine1"]
-            self.textLine2 = jsonData["textLine2"]
-            self.textLine3 = jsonData["textLine3"]  # Initialize the third line of text
-            self.fontSize1 = jsonData.get("fontSize1", 30)  # Initialize the font size for the first line
-            self.fontSize2 = jsonData.get("fontSize2", 20)  # Initialize the font size for the second line
-            self.fontSize3 = jsonData.get("fontSize3", 20)  # Initialize the font size for the third line
-            self.qrCodeUrl = jsonData["qrCodeUrl"]
-            self.modelPath = jsonData["modelPath"]
-            self.alpha = jsonData["alpha"]
-            self.beta = jsonData["beta"]
-            self.hideObstructed = jsonData["hideObstructed"]
+        self.valueChanged()  # Ensure the display text is set initially
 
-        self.valueChanged()
+    def loadFromJson(self, data):
+        self.name = data.get("name", "sticker")
+        self.width = data.get("width", 37)
+        self.height = data.get("height", 13)
+        self.topLeftRoundedCorner = data.get("topLeftRoundedCorner", 4)
+        self.topRightRoundedCorner = data.get("topRightRoundedCorner", 4)
+        self.bottomLeftRoundedCorner = data.get("bottomLeftRoundedCorner", 0)
+        self.bottomRightRoundedCorner = data.get("bottomRightRoundedCorner", 0)
+        self.textLine1 = data.get("textLine1", "")
+        self.textLine2 = data.get("textLine2", "")
+        self.textLine3 = data.get("textLine3", "")
+        self.fontSize1 = data.get("fontSize1", 30)
+        self.fontSize2 = data.get("fontSize2", 20)
+        self.fontSize3 = data.get("fontSize3", 20)
+        self.qrCodeUrl = data.get("qrCodeUrl", "")
+        self.modelPath = data.get("modelPath", "")
+        self.alpha = data.get("alpha", 180)
+        self.beta = data.get("beta", 180)
+        self.hideObstructed = data.get("hideObstructed", True)
+
+        self.valueChanged()  # Ensure the display text is updated after loading from JSON
 
     @QtCore.Slot()
     def valueChanged(self):
@@ -60,6 +84,7 @@ class Sticker(QtWidgets.QListWidgetItem):
 
     def getJson(self):
         return {
+            "name": self.name,
             "width": self.width,
             "height": self.height,
             "topLeftRoundedCorner": self.topLeftRoundedCorner,
