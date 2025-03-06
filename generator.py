@@ -133,7 +133,7 @@ def generateLabel(label):
     draw = ImageDraw.Draw(img)
 
     # Draw the border
-    lineWidth = 10
+    lineWidth = 2
     hl = lineWidth / 2
     topLeftRoundedCorner = label.get("topLeftRoundedCorner", 0)
     topRightRoundedCorner = label.get("topRightRoundedCorner", 0)
@@ -151,9 +151,9 @@ def generateLabel(label):
 
     # Write the text
     global defaultFont
-    fontSize1 = label.get("fontSize1", 30)  # Font size for the first line
-    fontSize2 = label.get("fontSize2", 20)  # Font size for the second line
-    fontSize3 = label.get("fontSize3", 20)  # Font size for the third line
+    fontSize1 = label.get("fontSize1", 40)  # Font size for the first line
+    fontSize2 = label.get("fontSize2", 30)  # Font size for the second line
+    fontSize3 = label.get("fontSize3", 30)  # Font size for the third line
 
     font1 = ImageFont.truetype("arial.ttf", fontSize1)
     font2 = ImageFont.truetype("arial.ttf", fontSize2)
@@ -199,8 +199,8 @@ def generateLabel(label):
     qr.add_data(label["qrCodeUrl"])
     qr.make(fit=True)
     qrCode = qr.make_image(fill_color="black", back_color="white")
-    qrCode.thumbnail((100, 100), Image.Resampling.LANCZOS)
-    img.paste(qrCode, (widthPoints - 110, 10))
+    qrCode.thumbnail((120, 120), Image.Resampling.LANCZOS)
+    img.paste(qrCode, (widthPoints - 132, 13))
 
     return img
 
