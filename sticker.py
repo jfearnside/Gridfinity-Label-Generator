@@ -27,6 +27,9 @@ class Sticker(QtWidgets.QListWidgetItem):
 
     def __init__(self, data=None):
         super().__init__()
+        self.setFlags(self.flags() | QtCore.Qt.ItemIsUserCheckable)
+        self.setCheckState(QtCore.Qt.Checked)  # Checked by default
+
         if data:
             self.loadFromJson(data)
         else:

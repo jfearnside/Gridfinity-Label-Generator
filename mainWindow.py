@@ -54,7 +54,7 @@ class MainWindow(QtWidgets.QMainWindow):
         fileMenu.addAction(saveAction)
 
         # Export Action
-        exportAction = QtGui.QAction("&Export as pdf", self)
+        exportAction = QtGui.QAction("&Export to PDF", self)
         exportAction.setShortcut("Ctrl+E")
         exportAction.triggered.connect(self.exportFile)
         fileMenu.addAction(exportAction)
@@ -71,10 +71,10 @@ class MainWindow(QtWidgets.QMainWindow):
         fileMenu.addAction(quitAction)
 
         # Add a toolbar with a button to export to PNG
-        self.toolbar = self.addToolBar("Main Toolbar")
-        exportToPNGButton = QtWidgets.QPushButton("Export to PNG", self)
-        exportToPNGButton.clicked.connect(self.exportToPNG)
-        self.toolbar.addWidget(exportToPNGButton)
+        # self.toolbar = self.addToolBar("Main Toolbar")
+        # exportToPNGButton = QtWidgets.QPushButton("Export to PNG", self)
+        # exportToPNGButton.clicked.connect(self.exportToPNG)
+        # self.toolbar.addWidget(exportToPNGButton)
 
         # Left part of the layout
         self.leftWidget = QtWidgets.QWidget(self)
@@ -90,20 +90,28 @@ class MainWindow(QtWidgets.QMainWindow):
         self.bottomButtons.layout = QtWidgets.QHBoxLayout(self.bottomButtons)
         self.bottomButtons.layout.setContentsMargins(0, 0, 0, 0)
 
-        self.addStickerButton = QtWidgets.QPushButton("+", self)
-        self.addStickerButton.setFixedSize(40, 40)
+        self.addStickerButton = QtWidgets.QPushButton("Add", self.bottomButtons)
+        # self.addStickerButton.setFixedSize(40, 40)
         self.addStickerButton.clicked.connect(self.newSticker)
         self.bottomButtons.layout.addWidget(self.addStickerButton)
 
-        self.deleteStickerButton = QtWidgets.QPushButton("-", self)
-        self.deleteStickerButton.setFixedSize(40, 40)
+        self.deleteStickerButton = QtWidgets.QPushButton("Delete", self.bottomButtons)
+        # self.deleteStickerButton.setFixedSize(40, 40)
         self.deleteStickerButton.clicked.connect(self.deleteSticker)
         self.bottomButtons.layout.addWidget(self.deleteStickerButton)
 
-        self.printButton = QtWidgets.QPushButton("PDF", self)
-        self.printButton.setFixedSize(40, 40)
+        self.printButton = QtWidgets.QPushButton("Export to PDF", self.bottomButtons)
+        # self.printButton.setFixedSize(40, 40)
         self.printButton.clicked.connect(self.exportFile)
         self.bottomButtons.layout.addWidget(self.printButton)
+
+        self.exportToPNGButton = QtWidgets.QPushButton("Export to PNG", self.bottomButtons)
+        self.exportToPNGButton.clicked.connect(self.exportToPNG)
+        self.bottomButtons.layout.addWidget(self.exportToPNGButton)
+
+        self.selectAllButton = QtWidgets.QPushButton("Select All", self.bottomButtons)
+        self.selectAllButton.clicked.connect(self.toggleSelectAll)
+        self.bottomButtons.layout.addWidget(self.selectAllButton)
 
         self.leftWidget.layout.addWidget(self.bottomButtons)
 
@@ -238,34 +246,33 @@ class MainWindow(QtWidgets.QMainWindow):
             return
 
         # Generate and save the PNGs
-        stickers = self.getStickers()  # Get the list of stickers
-        for sticker in stickers:
-            if sticker is None:
-                continue
+        for i in range(self.stickerList.count()):
+            sticker = self.stickerList.item(i)
+            if sticker.checkState() == QtCore.Qt.Checked:
+                label_data = {
+                    "width": sticker.width,
+                    "height": sticker.height,
+                    "topLeftRoundedCorner": sticker.topLeftRoundedCorner,
+                    "topRightRoundedCorner": sticker.topRightRoundedCorner,
+                    "bottomLeftRoundedCorner": sticker.bottomLeftRoundedCorner,
+                    "bottomRightRoundedCorner": sticker.bottomRightRoundedCorner,
+                    "textLine1": sticker.textLine1,
+                    "textLine2": sticker.textLine2,
+                    "textLine3": sticker.textLine3,
+                    "fontSize1": sticker.fontSize1,
+                    "fontSize2": sticker.fontSize2,
+                    "fontSize3": sticker.fontSize3,
+                    "qrCodeUrl": sticker.qrCodeUrl,
+                    "modelPath": sticker.modelPath,
+                    "alpha": sticker.alpha,
+                    "beta": sticker.beta,
+                    "hideObstructed": sticker.hideObstructed
+                }
 
-            label_data = {
-                "width": sticker.width,
-                "height": sticker.height,
-                "topLeftRoundedCorner": sticker.topLeftRoundedCorner,
-                "topRightRoundedCorner": sticker.topRightRoundedCorner,
-                "bottomLeftRoundedCorner": sticker.bottomLeftRoundedCorner,
-                "bottomRightRoundedCorner": sticker.bottomRightRoundedCorner,
-                "textLine1": sticker.textLine1,
-                "textLine2": sticker.textLine2,
-                "textLine3": sticker.textLine3,
-                "fontSize1": sticker.fontSize1,
-                "fontSize2": sticker.fontSize2,
-                "fontSize3": sticker.fontSize3,
-                "qrCodeUrl": sticker.qrCodeUrl,
-                "modelPath": sticker.modelPath,
-                "alpha": sticker.alpha,
-                "beta": sticker.beta,
-                "hideObstructed": sticker.hideObstructed
-            }
-
-            img = generateLabel(label_data)
-            img_path = os.path.join(folder, f"{sticker.name}.png")
-            img.save(img_path)
+                img = generateLabel(label_data)
+                filename = f"{sticker.textLine1}_{sticker.textLine2}_{sticker.textLine3}.png".replace(" ", "_")
+                img_path = os.path.join(folder, filename)
+                img.save(img_path)
 
         # Show a message box to indicate success
         msgBox = QtWidgets.QMessageBox()
@@ -294,6 +301,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.stickerForm.saveData()
         sticker = self.stickerForm.sticker
         ...  # Save sticker data to a file or other destination
+
+    def toggleSelectAll(self):
+        select_all = self.selectAllButton.text() == "Select All"
+        for i in range(self.stickerList.count()):
+            item = self.stickerList.item(i)
+            item.setCheckState(QtCore.Qt.Checked if select_all else QtCore.Qt.Unchecked)
+        self.selectAllButton.setText("Deselect All" if select_all else "Select All")
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
