@@ -191,7 +191,21 @@ class MainWindow(QtWidgets.QMainWindow):
         fileName, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Export", "",
                                                   "PDF Files (*.pdf)", options=options)
         if fileName:
-            generateLabelSheets(self.getData(), fileName)
+            # Filter the stickers based on their check state
+            checked_stickers = []
+            for i in range(self.stickerList.count()):
+                sticker = self.stickerList.item(i)
+                if sticker.checkState() == QtCore.Qt.Checked:
+                    checked_stickers.append(sticker.getJson())
+
+            # Create a data dictionary with only the checked stickers
+            dataDict = {
+                "pageWidth": self.pageWidth,
+                "pageHeight": self.pageHeight,
+                "stickerList": checked_stickers
+            }
+
+            generateLabelSheets(dataDict, fileName)
             msgBox = QtWidgets.QMessageBox(self)
             msgBox.setWindowTitle("Export Complete")
             msgBox.setText(f"PDF export complete. File saved to: {fileName}")
