@@ -48,10 +48,10 @@ class MainWindow(QtWidgets.QMainWindow):
         fileMenu.addAction(saveAction)
 
         # Save as File Action
-        saveAction = QtGui.QAction("&Save as...", self)
-        saveAction.setShortcut("Ctrl+Shift+S")
-        saveAction.triggered.connect(self.saveAsFile)
-        fileMenu.addAction(saveAction)
+        saveAsAction = QtGui.QAction("&Save as...", self)
+        saveAsAction.setShortcut("Ctrl+Shift+S")
+        saveAsAction.triggered.connect(self.saveAsFile)
+        fileMenu.addAction(saveAsAction)
 
         # Export Action
         exportAction = QtGui.QAction("&Export to PDF", self)
@@ -70,12 +70,6 @@ class MainWindow(QtWidgets.QMainWindow):
         quitAction.triggered.connect(self.closeApp)
         fileMenu.addAction(quitAction)
 
-        # Add a toolbar with a button to export to PNG
-        # self.toolbar = self.addToolBar("Main Toolbar")
-        # exportToPNGButton = QtWidgets.QPushButton("Export to PNG", self)
-        # exportToPNGButton.clicked.connect(self.exportToPNG)
-        # self.toolbar.addWidget(exportToPNGButton)
-
         # Left part of the layout
         self.leftWidget = QtWidgets.QWidget(self)
         self.leftWidget.layout = QtWidgets.QVBoxLayout(self.leftWidget)
@@ -90,18 +84,19 @@ class MainWindow(QtWidgets.QMainWindow):
         self.bottomButtons.layout = QtWidgets.QHBoxLayout(self.bottomButtons)
         self.bottomButtons.layout.setContentsMargins(0, 0, 0, 0)
 
+        self.selectAllButton = QtWidgets.QPushButton("Deselect All", self.bottomButtons)  # Set initial text to "Deselect All"
+        self.selectAllButton.clicked.connect(self.toggleSelectAll)
+        self.bottomButtons.layout.addWidget(self.selectAllButton)
+
         self.addStickerButton = QtWidgets.QPushButton("Add", self.bottomButtons)
-        # self.addStickerButton.setFixedSize(40, 40)
         self.addStickerButton.clicked.connect(self.newSticker)
         self.bottomButtons.layout.addWidget(self.addStickerButton)
 
         self.deleteStickerButton = QtWidgets.QPushButton("Delete", self.bottomButtons)
-        # self.deleteStickerButton.setFixedSize(40, 40)
         self.deleteStickerButton.clicked.connect(self.deleteSticker)
         self.bottomButtons.layout.addWidget(self.deleteStickerButton)
 
         self.printButton = QtWidgets.QPushButton("Export to PDF", self.bottomButtons)
-        # self.printButton.setFixedSize(40, 40)
         self.printButton.clicked.connect(self.exportFile)
         self.bottomButtons.layout.addWidget(self.printButton)
 
@@ -109,9 +104,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.exportToPNGButton.clicked.connect(self.exportToPNG)
         self.bottomButtons.layout.addWidget(self.exportToPNGButton)
 
-        self.selectAllButton = QtWidgets.QPushButton("Select All", self.bottomButtons)
-        self.selectAllButton.clicked.connect(self.toggleSelectAll)
-        self.bottomButtons.layout.addWidget(self.selectAllButton)
+        
 
         self.leftWidget.layout.addWidget(self.bottomButtons)
 
