@@ -104,8 +104,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.exportToPNGButton.clicked.connect(self.exportToPNG)
         self.bottomButtons.layout.addWidget(self.exportToPNGButton)
 
-        
-
         self.leftWidget.layout.addWidget(self.bottomButtons)
 
         # Right part of the layout
@@ -118,6 +116,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.show()
 
         self.newSticker()
+        self.selectFirstItem()
 
     @QtCore.Slot()
     def newFile(self):
@@ -135,7 +134,6 @@ class MainWindow(QtWidgets.QMainWindow):
     
     @QtCore.Slot()
     def saveFile(self):
-
         self.refresh()
         if self.currentFileName == "":
             self.saveAsFile()
@@ -144,7 +142,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     @QtCore.Slot()
     def saveAsFile(self):
-
         self.refresh()
         options = QtWidgets.QFileDialog.Options()
         fileName, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Save File", "",
@@ -154,7 +151,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def loadFromFile(self, fileName):
         with open(fileName, 'r') as file:
-
             self.currentFileName = fileName
             self.stickerList.clear()
             self.stickerForm.loadData(None)
@@ -165,6 +161,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.stickerList.clear()
             for stickerData in data["stickerList"]:
                 self.stickerList.addItem(Sticker(stickerData))
+            self.selectFirstItem()
 
     def getData(self):
         self.refresh()
@@ -218,11 +215,13 @@ class MainWindow(QtWidgets.QMainWindow):
     @QtCore.Slot()
     def newSticker(self):
         self.stickerList.addItem(Sticker())
+        self.selectFirstItem()
 
     @QtCore.Slot()
     def deleteSticker(self):
         if self.stickerList.currentItem() is not None:
             self.stickerList.takeItem(self.stickerList.currentRow())
+        self.selectFirstItem()
 
     @QtCore.Slot()
     def refresh(self):
@@ -230,6 +229,10 @@ class MainWindow(QtWidgets.QMainWindow):
             self.stickerForm.saveData()
             self.stickerForm.loadData(self.stickerList.currentItem())
 
+    def selectFirstItem(self):
+        if self.stickerList.count() > 0:
+            self.stickerList.setCurrentRow(0)
+            self.refresh()
 
     def exportToPNG(self):
         # Prompt the user to select a folder for the output
@@ -278,22 +281,6 @@ class MainWindow(QtWidgets.QMainWindow):
         if ret == QtWidgets.QMessageBox.Yes:
             # Open the folder
             os.startfile(folder)
-
-    def getStickers(self):
-        # Placeholder method to get the list of stickers
-        # Replace this with your actual method to get the list of stickers
-        return [self.stickerForm.sticker]  # Example: return a list with a single sticker
-
-    def loadSticker(self):
-        # Logic to load sticker data
-        sticker = ...  # Load sticker data from a file or other source
-        self.stickerForm.loadData(sticker)
-
-    def saveSticker(self):
-        # Logic to save sticker data
-        self.stickerForm.saveData()
-        sticker = self.stickerForm.sticker
-        ...  # Save sticker data to a file or other destination
 
     def toggleSelectAll(self):
         select_all = self.selectAllButton.text() == "Select All"
