@@ -1,50 +1,47 @@
-# Gridfinity bin sticker generator
+# Hardware sticker generator
 
-This project aims at building a sticker generator exported as a pdf of stickers that you can then print on a regular printer.
+Credit: THis project is a fork of Teh Gridfinity Label Maker by Clement Roblot
+CHeck out his project here: https://github.com/clement-roblot/Gridfinity-Label-Generator
 
-The "killer" feature of this project is the use of [Open CASCADE](https://www.opencascade.com/) to dynamicaly render the 3d view of the object showed on the sticker.
+This application is a label generator aimed at Niimbot users to make labels for small hardware parts containers.
+ALthough this product is primarily meant for use with the Niimbot range of thermal printers it can be used by any printer. You can output labels as a PDF as a sheet of labels. 
 
-## Intro video
 
-[![Intro video](https://img.youtube.com/vi/FzSsLz4fwTY/0.jpg)](https://youtu.be/FzSsLz4fwTY)
+I like these: https://www.amazon.com/dp/B07VMVYKTS
+This organiser is great for these containers (and doesn't have to be used in a toolbox): https://makerworld.com/en/models/961737-husky-workbench-small-parts-storage-organization#profileId-931766
 
-## Install
 
-How to build the proper environnement:
+The "killer" feature of this project is the ability to dynamicaly render the 3d view of the object shown on the sticker.
 
-```bash
-conda create -n pyoccenv python=3.8
-conda activate pyoccenv
-conda install -c conda-forge pythonocc-core pillow pyside6 qrcode
-```
-
-## Run
-
-Then once installed, just activate the environnement and run the GUI:
-
-```bash
-conda activate pyoccenv
-python main.py
-```
 
 ## Finding 3d models
 
-Its great to be able to make nice stickers from 3d models, but I'm not gonna model all the screw sizes I have for this thing. Not to worry, the internet is full of 3d models for most mechanical things. An amazing resource for this is [McMaster-Carr](https://www.mcmaster.com/) where you can find the step files of basicaly everything mechanical.
+McMasterCarr is a great resource for 3D models of hardware parts. https://www.mcmaster.com/
+Find the hardware part you want a label for on McMasterCarr and you can download a STEP files for the item. Place this in a folder and browse to teh STEP file in teh application. Once loaded (its a bit slow) you can use the sliders to adjust he rotation. 
 
-The meca folder contains a step file as exmemple, it is taken from [here](https://grabcad.com/library/ph-philips-sscrew-1).
+## Instructions for use
 
-## Additional customization
+THe application opens with one empty sticker loaded. You can add additional labels by clicking on the add button. 
+You can also use the file menu to open a JSON file that contain preconfigured sample labels (File-->Open). 
 
-You can edit the json with the details of your stickers and then render it manually with the command:
+You can save your labels as a JSON using the Save command available on the File menu (File --> Save)
 
-```bash
-python generator.py exempleSheet.json
-```
-A few advanced features are not accessible in the GUI like the page size in mm.
+CLick on teh label in the list that you want to edit. Enter information about your hardware part into line 1, 2, and 3. 
+For Example
+Line 1: M3 x 15mm
+Line 2: Socket Hex
+Line 3: Screws
 
-### Fonts
-You can also add a font parameter to specify the font used to render the texts, for example:
+You can enter a URL to create a QR code. I like to add a link to the McMasterCarr page so that I can easily reorder parts. 
+On the 3D Model line click browse and navigate to a 3D STEP file of the part. You can use the Alpha and Beta sliders to rotate the part in the 3D preview window. 
 
-```bash
-"font": "/usr/share/fonts/truetype/msttcorefonts/times.ttf",
-```
+Click Preview to see a preview of your label. If needed you can adjust the font sizes of the 3 lines of text. 
+NOTE: The preview does not auto-refresh. Once you have made changes click the Refresh Preview button to check font size etc. 
+
+You can also mass edit the json with the details of your labels
+
+Once you are happy with your labels you can export them to either individual PNGs or a PDF contianing sheets of labels. 
+NOTE: Only the labels that are checked on the list will export. You can use the Select All/Deselect All button to help with selecting large numebrs of labels. 
+
+The Top/Bottom corner items int eh UI control are used to give your label rounded corners. 
+

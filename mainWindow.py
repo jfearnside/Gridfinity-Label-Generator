@@ -105,6 +105,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.exportToPNGButton.clicked.connect(self.exportToPNG)
         self.bottomButtons.layout.addWidget(self.exportToPNGButton)
 
+        # Add Sort Button
+        self.sortButton = QtWidgets.QPushButton("Sort", self.bottomButtons)
+        self.sortButton.clicked.connect(self.sortStickers)
+        self.bottomButtons.layout.addWidget(self.sortButton)
+
         self.leftWidget.layout.addWidget(self.bottomButtons)
 
         # Right part of the layout
@@ -323,6 +328,10 @@ class MainWindow(QtWidgets.QMainWindow):
             item = self.stickerList.item(i)
             item.setCheckState(QtCore.Qt.Checked if select_all else QtCore.Qt.Unchecked)
         self.selectAllButton.setText("Deselect All" if select_all else "Select All")
+
+    @QtCore.Slot()
+    def sortStickers(self):
+        self.stickerList.sortItems()
 
     def showBusyIndicator(self, message):
         self.progressDialog = QtWidgets.QProgressDialog(self)
