@@ -82,34 +82,42 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Control buttons at the bottom left
         self.bottomButtons = QtWidgets.QWidget(self)
-        self.bottomButtons.layout = QtWidgets.QHBoxLayout(self.bottomButtons)
+        self.bottomButtons.layout = QtWidgets.QVBoxLayout(self.bottomButtons)
         self.bottomButtons.layout.setContentsMargins(0, 0, 0, 0)
+
+        self.topButtonRow = QtWidgets.QHBoxLayout()
+        self.bottomButtonRow = QtWidgets.QHBoxLayout()
 
         self.selectAllButton = QtWidgets.QPushButton("Deselect All", self.bottomButtons)  # Set initial text to "Deselect All"
         self.selectAllButton.clicked.connect(self.toggleSelectAll)
-        self.bottomButtons.layout.addWidget(self.selectAllButton)
+        self.topButtonRow.addWidget(self.selectAllButton)
 
         self.addStickerButton = QtWidgets.QPushButton("Add", self.bottomButtons)
         self.addStickerButton.clicked.connect(self.newSticker)
-        self.bottomButtons.layout.addWidget(self.addStickerButton)
+        self.topButtonRow.addWidget(self.addStickerButton)
 
         self.deleteStickerButton = QtWidgets.QPushButton("Delete", self.bottomButtons)
         self.deleteStickerButton.clicked.connect(self.deleteSticker)
-        self.bottomButtons.layout.addWidget(self.deleteStickerButton)
+        self.topButtonRow.addWidget(self.deleteStickerButton)
+
+        self.duplicateStickerButton = QtWidgets.QPushButton("Duplicate", self.bottomButtons)
+        self.duplicateStickerButton.clicked.connect(self.duplicateSticker)
+        self.topButtonRow.addWidget(self.duplicateStickerButton)
 
         self.printButton = QtWidgets.QPushButton("Export to PDF", self.bottomButtons)
         self.printButton.clicked.connect(self.exportFile)
-        self.bottomButtons.layout.addWidget(self.printButton)
+        self.bottomButtonRow.addWidget(self.printButton)
 
         self.exportToPNGButton = QtWidgets.QPushButton("Export to PNG", self.bottomButtons)
         self.exportToPNGButton.clicked.connect(self.exportToPNG)
-        self.bottomButtons.layout.addWidget(self.exportToPNGButton)
+        self.bottomButtonRow.addWidget(self.exportToPNGButton)
 
-        # Add Sort Button
         self.sortButton = QtWidgets.QPushButton("Sort", self.bottomButtons)
         self.sortButton.clicked.connect(self.sortStickers)
-        self.bottomButtons.layout.addWidget(self.sortButton)
+        self.bottomButtonRow.addWidget(self.sortButton)
 
+        self.bottomButtons.layout.addLayout(self.topButtonRow)
+        self.bottomButtons.layout.addLayout(self.bottomButtonRow)
         self.leftWidget.layout.addWidget(self.bottomButtons)
 
         # Right part of the layout
@@ -332,6 +340,18 @@ class MainWindow(QtWidgets.QMainWindow):
     @QtCore.Slot()
     def sortStickers(self):
         self.stickerList.sortItems()
+
+    @QtCore.Slot()
+    def duplicateSticker(self):
+        current_item = self.stickerList.currentItem()
+        if current_item is not None:
+            new_sticker = Sticker(current_item.getJson())
+            current_row = self.stickerList.currentRow()
+            self.stickerList.insertItem(current_row + 1, new_sticker)
+            self.stickerList.setCurrentItem(new_sticker)
+            self.stickerForm.saveData()  # Save data before refreshing
+            self.stickerForm.loadData(new_sticker)  # Load data for the new sticker
+            self.stickerForm.refreshPreview()  # Refresh the preview after duplicating a sticker
 
     def showBusyIndicator(self, message):
         self.progressDialog = QtWidgets.QProgressDialog(self)
