@@ -18,6 +18,12 @@ from updatedOffscreenRenderer import UpdatedOffscreenRenderer
 dpi = 300
 defaultFont = None
 
+def _load_font(size):
+    try:
+        return ImageFont.truetype("arial.ttf", size)
+    except IOError:
+        return ImageFont.load_default()
+
 def renderAngle(shape, orientation = gp_Dir(1., 0., 0.), hideObstructed = True):
 
     myAlgo = HLRBRep_Algo() # 0.00s
@@ -95,22 +101,8 @@ def render3D(stepFile, orientation = gp_Dir(1., 0., 0.), hideObstructed = True):
         aCompound = renderAngle(myshape, orientation, hideObstructed)   # 1.39
         renderer = UpdatedOffscreenRenderer()   # 0.03s
         renderer.DisplayShape(aCompound, color="Black", transparency=True, dump_image_path='.', dump_image_filename="tmp3D.png")    # 0.03s
-    except ValueError:
-        pass
-
-def getTextSize(text):
-
-    global defaultFont
-
-    if text == "":
-        return (0, 0)
-
-    ascent, descent = defaultFont.getmetrics()
-
-    text_width = defaultFont.getmask(text).getbbox()[2]
-    text_height = defaultFont.getmask(text).getbbox()[3] + descent
-
-    return (text_width, text_height)
+    except ValueError as e:
+        print(f"Warning: 3D rendering failed for {stepFile!r}: {e}")
 
 def generateLabel(label):
     widthPoints = int(label["width"] * dpi / 25.4)
@@ -138,14 +130,13 @@ def generateLabel(label):
     d.arc([(widthPoints - (2 * bottomRightRoundedCorner), heightPoints - (2 * bottomRightRoundedCorner)), (widthPoints, heightPoints)], 0, 90, fill="black", width=lineWidth)
 
     # Write the text
-    global defaultFont
     fontSize1 = label.get("fontSize1", 30)  # Font size for the first line
     fontSize2 = label.get("fontSize2", 20)  # Font size for the second line
     fontSize3 = label.get("fontSize3", 20)  # Font size for the third line
 
-    font1 = ImageFont.truetype("arial.ttf", fontSize1)
-    font2 = ImageFont.truetype("arial.ttf", fontSize2)
-    font3 = ImageFont.truetype("arial.ttf", fontSize3)
+    font1 = _load_font(fontSize1)
+    font2 = _load_font(fontSize2)
+    font3 = _load_font(fontSize3)
 
     l1Width, l1Height = d.textbbox((0, 0), label["textLine1"], font=font1)[2:]
     l2Width, l2Height = d.textbbox((0, 0), label["textLine2"], font=font2)[2:]
@@ -173,7 +164,7 @@ def generateLabel(label):
             modelImage.thumbnail((imagesHeight, imagesHeight), Image.Resampling.LANCZOS)
             img.paste(modelImage, (imagesMargin, imagesMargin))
         except FileNotFoundError:
-            pass
+            print(f"Warning: 3D render output not found after rendering {label['modelPath']!r}")
 
     # Draw the QR code
     # box_size is the pixel size of each square of the QR code
@@ -195,11 +186,7 @@ def generateLabel(label):
 
 def generateLabelSheets(labelDataList, dstPath="out.pdf"):
     global defaultFont
-    try:
-        defaultFont = ImageFont.truetype("arial.ttf", 38)
-    except IOError:
-        print("Arial font not found. Using built-in default font.")
-        defaultFont = ImageFont.load_default()
+    defaultFont = _load_font(38)
 
     labels = []
     for label in labelDataList["stickerList"]:
@@ -220,7 +207,7 @@ def generateLabelSheets(labelDataList, dstPath="out.pdf"):
             yOffset += label.height + margin
 
         outSheet.paste(label, (xOffset, yOffset))
-        xOffset += 500
+        xOffset += label.width
 
     outSheet.save(dstPath, save_all=True)
 

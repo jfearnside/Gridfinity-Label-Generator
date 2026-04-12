@@ -115,10 +115,11 @@ class StickerForm(QtWidgets.QWidget):
         self.graphicsView.setScene(self.scene)
         self.layout.addWidget(self.graphicsView, currentLayoutLine, 0, 3, 4)
 
-        # Load PNG image from disk (temporary)
-        pixmap = QtGui.QPixmap("/home/karlito/creation/gridfinity/labelGenerator/tmp3D.png")
-        self.scene.addPixmap(pixmap)
-        self.graphicsView.fitInView(self.scene.itemsBoundingRect(), QtCore.Qt.KeepAspectRatio)
+        # Load preview image if a previous render exists
+        if os.path.exists("tmp3D.png"):
+            pixmap = QtGui.QPixmap("tmp3D.png")
+            self.scene.addPixmap(pixmap)
+            self.graphicsView.fitInView(self.scene.itemsBoundingRect(), QtCore.Qt.KeepAspectRatio)
 
         # 3d view controls
         self.layout.addWidget(QtWidgets.QLabel("Alpha:"), currentLayoutLine, 4)

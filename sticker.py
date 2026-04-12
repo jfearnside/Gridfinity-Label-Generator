@@ -25,7 +25,7 @@ class Sticker(QtWidgets.QListWidgetItem):
     
     hideObstructed = True
 
-    def __init__(self, jsonData={}, parent=None):
+    def __init__(self, jsonData=None, parent=None):
         super().__init__(parent)
 
         if jsonData:
